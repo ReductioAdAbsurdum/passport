@@ -1,0 +1,774 @@
+<title>Learning Passport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap">
+
+<style>
+  /* ---------- tokens : light is the base, both themes defined ---------- */
+  :root {
+    --paper:      #F0F2EF;
+    --paper-2:    #E6EAE4;
+    --paper-3:    #DCE2DA;
+    --fg:         #121A16;
+    --fg-mid:     #4A554E;
+    --fg-dim:     #6E7972;
+    --rule:       #C7CFC6;
+    --rule-soft:  #D8DED6;
+    --src:        #16624A;   /* source curriculum */
+    --src-wash:   #DFEBE4;
+    --dst:        #37458C;   /* destination system */
+    --dst-wash:   #E0E3F0;
+    --warn:       #9A5A21;
+    --warn-wash:  #F2E6D6;
+    --screen:     #FBFCFA;
+    --shadow:     0 1px 0 rgba(18,26,22,.05), 0 12px 32px -24px rgba(18,26,22,.5);
+    --maxw: 1120px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:     #0D1211;
+      --paper-2:   #141B19;
+      --paper-3:   #1B2321;
+      --fg:        #E9EEEA;
+      --fg-mid:    #A3AEA8;
+      --fg-dim:    #7E8A84;
+      --rule:      #2A3330;
+      --rule-soft: #212926;
+      --src:       #5CC79C;
+      --src-wash:  #16251F;
+      --dst:       #97A5F2;
+      --dst-wash:  #191E33;
+      --warn:      #E0A868;
+      --warn-wash: #2A2116;
+      --screen:    #121917;
+      --shadow:    0 1px 0 rgba(0,0,0,.3), 0 16px 40px -28px #000;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:     #0D1211;
+    --paper-2:   #141B19;
+    --paper-3:   #1B2321;
+    --fg:        #E9EEEA;
+    --fg-mid:    #A3AEA8;
+    --fg-dim:    #7E8A84;
+    --rule:      #2A3330;
+    --rule-soft: #212926;
+    --src:       #5CC79C;
+    --src-wash:  #16251F;
+    --dst:       #97A5F2;
+    --dst-wash:  #191E33;
+    --warn:      #E0A868;
+    --warn-wash: #2A2116;
+    --screen:    #121917;
+    --shadow:    0 1px 0 rgba(0,0,0,.3), 0 16px 40px -28px #000;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--fg);
+    font-family: "Public Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- type ---------- */
+  h1, h2, h3 { font-family: "Fraunces", Georgia, "Times New Roman", serif; font-weight: 600; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2.5rem, 6.4vw, 5.1rem); line-height: .96; letter-spacing: -.025em; }
+  h2 { font-size: clamp(1.9rem, 4.2vw, 3.3rem); line-height: 1.02; letter-spacing: -.02em; }
+  h3 { font-size: clamp(1.15rem, 1.8vw, 1.4rem); line-height: 1.2; letter-spacing: -.01em; }
+  p  { margin: 0; }
+
+  .label {
+    font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .18em;
+    color: var(--fg-dim);
+  }
+  .lede { font-size: clamp(1.05rem, 1.5vw, 1.3rem); color: var(--fg-mid); max-width: 62ch; }
+  .fine { font-size: .82rem; color: var(--fg-dim); line-height: 1.5; }
+  em.pull { font-style: normal; color: var(--src); }
+
+  /* ---------- scaffolding ---------- */
+  .rail {
+    position: fixed; inset: 0 0 auto 0; height: 2px; background: transparent; z-index: 40;
+  }
+  .rail > i { display: block; height: 100%; width: 0; background: var(--src); transition: width .12s linear; }
+
+  .masthead {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    padding: .95rem clamp(1rem, 4vw, 2.4rem);
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .masthead .mark { display: flex; align-items: center; gap: .6rem; }
+  .masthead .chip {
+    width: 15px; height: 20px; border-radius: 2px; border: 1.5px solid var(--src);
+    position: relative; flex: none;
+  }
+  .masthead .chip::after {
+    content: ""; position: absolute; inset: 3px 3px auto 3px; height: 1.5px;
+    background: var(--src); box-shadow: 0 4px 0 var(--src), 0 8px 0 var(--src);
+  }
+  .masthead .name { font-family: "DM Mono", monospace; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+
+  main { display: block; }
+
+  section {
+    padding: clamp(5.5rem, 11vh, 9rem) clamp(1.15rem, 4vw, 2.4rem);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; }
+  .stack { display: flex; flex-direction: column; }
+  .g-s  { gap: .6rem; }
+  .g-m  { gap: 1.35rem; }
+  .g-l  { gap: 2.6rem; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    min-height: 100svh; display: flex; flex-direction: column; justify-content: center;
+    padding-top: clamp(6rem, 14vh, 9rem);
+  }
+  .hero h1 { max-width: 15ch; }
+  .hero .sub { max-width: 54ch; font-size: clamp(1.1rem, 1.7vw, 1.45rem); color: var(--fg-mid); }
+  .hero .sub b { color: var(--fg); font-weight: 600; }
+
+  .mrz {
+    margin-top: clamp(2.5rem, 6vh, 4.5rem);
+    border-top: 1px solid var(--rule);
+    padding-top: .9rem;
+    overflow-x: auto;
+  }
+  .mrz div::before {
+    content: attr(data-mrz);
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: clamp(.62rem, 1.15vw, .84rem);
+    letter-spacing: .08em;
+    color: var(--fg-dim);
+    white-space: pre;
+  }
+  .mrz div + div { margin-top: .25rem; }
+
+  /* ---------- stat grids ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .stat { background: var(--paper); padding: 1.5rem 1.4rem; display: flex; flex-direction: column; gap: .45rem; }
+  .stat .n {
+    font-family: "Fraunces", Georgia, serif; font-weight: 500;
+    font-size: clamp(2rem, 4.2vw, 3.1rem); line-height: 1; letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .n small { font-size: .42em; letter-spacing: 0; color: var(--fg-mid); }
+  .stat .k { font-size: .95rem; color: var(--fg-mid); }
+  .stat .src { font-family: "DM Mono", monospace; font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-dim); margin-top: auto; padding-top: .5rem; }
+
+  /* ---------- the matched pair : centerpiece ---------- */
+  .match { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch; }
+  .card {
+    background: var(--paper-2); border: 1px solid var(--rule);
+    padding: clamp(1.25rem, 2.4vw, 1.9rem);
+    display: flex; flex-direction: column; gap: .85rem;
+    box-shadow: var(--shadow);
+  }
+  .card.a { border-top: 3px solid var(--src); }
+  .card.b { border-top: 3px solid var(--dst); }
+  .card .flag { font-family: "DM Mono", monospace; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; }
+  .card.a .flag { color: var(--src); }
+  .card.b .flag { color: var(--dst); }
+  .card .out {
+    font-family: "Fraunces", Georgia, serif; font-size: clamp(1.15rem, 2.1vw, 1.6rem);
+    line-height: 1.22; letter-spacing: -.01em;
+  }
+  .card .meta { font-family: "DM Mono", monospace; font-size: .7rem; line-height: 1.7; color: var(--fg-dim); margin-top: auto; }
+  .card .meta span { color: var(--fg-mid); }
+
+  .seam {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 1rem; background: var(--paper); border-block: 1px solid var(--rule);
+  }
+  .seam .eq {
+    font-family: "DM Mono", monospace; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--fg-mid); writing-mode: vertical-rl; transform: rotate(180deg); padding: .6rem 0;
+  }
+  .seam .bar { flex: 1; width: 1px; background: linear-gradient(var(--src), var(--dst)); min-height: 24px; }
+
+  @media (max-width: 760px) {
+    .match { grid-template-columns: 1fr; }
+    .seam { flex-direction: row; border-block: 0; border-inline: 1px solid var(--rule); padding: .7rem 1rem; }
+    .seam .eq { writing-mode: horizontal-tb; transform: none; padding: 0 .7rem; }
+    .seam .bar { width: auto; height: 1px; flex: 1; background: linear-gradient(90deg, var(--src), var(--dst)); }
+  }
+
+  /* ---------- two-column contrast ---------- */
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .col { background: var(--paper); padding: clamp(1.4rem, 2.6vw, 2.1rem); display: flex; flex-direction: column; gap: .8rem; }
+  .col .who { font-family: "DM Mono", monospace; font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--fg-dim); }
+  .col.ours { background: var(--src-wash); }
+  .col.ours .who { color: var(--src); }
+  .col .claim { font-family: "Fraunces", Georgia, serif; font-size: clamp(1.25rem, 2.3vw, 1.75rem); line-height: 1.15; letter-spacing: -.015em; }
+  .col p { color: var(--fg-mid); font-size: .97rem; }
+
+  /* ---------- ledger list (the raise) ---------- */
+  .ledger { border-top: 1px solid var(--rule); }
+  .row {
+    display: grid; grid-template-columns: minmax(140px, 200px) 1fr;
+    gap: clamp(.6rem, 3vw, 2.5rem); align-items: baseline;
+    padding: 1.15rem 0; border-bottom: 1px solid var(--rule-soft);
+  }
+  .row .t { font-family: "DM Mono", monospace; font-size: .72rem; letter-spacing: .13em; text-transform: uppercase; color: var(--src); }
+  .row .d { color: var(--fg-mid); }
+  .row .d b { color: var(--fg); font-weight: 600; }
+  @media (max-width: 620px) { .row { grid-template-columns: 1fr; gap: .3rem; } }
+
+  /* ---------- field note ---------- */
+  .note {
+    border-left: 3px solid var(--src); background: var(--paper-2);
+    padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: .5rem;
+  }
+  .note .h { font-family: "DM Mono", monospace; font-size: .68rem; letter-spacing: .15em; text-transform: uppercase; color: var(--src); }
+  .note p { color: var(--fg-mid); max-width: 68ch; }
+
+  /* ---------- closing ---------- */
+  .close h2 { max-width: 18ch; }
+  .close .kicker { color: var(--fg-mid); max-width: 56ch; }
+  .market { display: flex; flex-wrap: wrap; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .market > div { background: var(--paper); padding: 1.25rem 1.4rem; flex: 1 1 240px; display: flex; flex-direction: column; gap: .35rem; }
+  .market .m-n { font-family: "Fraunces", Georgia, serif; font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1; letter-spacing: -.02em; }
+  .market .m-k { font-size: .9rem; color: var(--fg-mid); }
+
+  /* ---------- the same desk, before and after ---------- */
+  .ba { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: clamp(1.5rem, 3vw, 2.6rem); }
+  .ba figure { margin: 0; display: flex; flex-direction: column; gap: .9rem; }
+  .ba figcaption {
+    font-family: "DM Mono", monospace; font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
+    display: flex; align-items: baseline; gap: .6rem;
+  }
+  .ba .now-cap { color: var(--warn); }
+  .ba .after-cap { color: var(--src); }
+  .ba figcaption em { font-style: normal; color: var(--fg-dim); letter-spacing: .04em; text-transform: none; font-family: "Public Sans", sans-serif; font-size: .82rem; }
+
+  .split { display: flex; align-items: stretch; gap: .7rem; }
+  .doc {
+    flex: 0 0 22%; min-width: 96px; align-self: flex-start;
+    background: var(--screen); border: 1px solid var(--rule);
+    padding: .6rem .55rem .65rem; transform: rotate(-1.1deg);
+    box-shadow: 0 12px 26px -20px rgba(0,0,0,.6);
+    display: flex; flex-direction: column; gap: .35rem;
+  }
+  .doc .hd { font-family: "DM Mono", monospace; font-size: .58rem; letter-spacing: .04em; text-align: center; color: var(--fg-mid); line-height: 1.5; }
+  .doc .hd b { display: block; color: var(--fg); font-weight: 500; letter-spacing: .05em; }
+  .doc hr { border: 0; border-top: 1px solid var(--rule); margin: .15rem 0; width: 100%; }
+  .doc .bars { display: flex; flex-direction: column; gap: .22rem; margin: .12rem 0; }
+  .doc .bars i { display: block; height: 3px; background: var(--rule); border-radius: 1px; }
+  .doc .gr { display: flex; justify-content: space-between; gap: .35rem; font-family: "DM Mono", monospace; font-size: .6rem; color: var(--fg); }
+  .doc .gr span { color: var(--fg-mid); }
+  .doc .end { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; margin-top: .5rem; }
+  .doc .sig { font-family: "Caveat", cursive; font-size: .95rem; color: var(--fg-mid); line-height: 1; }
+  .doc .stamp {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px dashed var(--dst); align-self: flex-end;
+    color: var(--dst); font-family: "DM Mono", monospace; font-size: .5rem;
+    display: flex; align-items: center; justify-content: center; transform: rotate(-13deg); opacity: .8;
+  }
+
+  .arrow { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .35rem; }
+  .arrow .g { font-size: 1.1rem; line-height: 1; color: var(--fg-dim); }
+  .arrow .w {
+    font-family: "DM Mono", monospace; font-size: .58rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--fg-dim); writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;
+  }
+
+  .screen { flex: 1; min-width: 0; border: 1px solid var(--rule); background: var(--screen); display: flex; flex-direction: column; box-shadow: var(--shadow); }
+  .screen .bar { display: flex; align-items: center; gap: .5rem; padding: .6rem .8rem; border-bottom: 1px solid var(--rule); background: var(--paper-2); }
+  .screen .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rule); flex: none; }
+  .screen .fn { font-family: "DM Mono", monospace; font-size: .68rem; letter-spacing: .04em; color: var(--fg-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .tbl { display: flex; flex-direction: column; }
+  .trow { display: flex; border-bottom: 1px solid var(--rule); }
+  .trow:last-child { border-bottom: 0; }
+  .cell { flex: 1 1 50%; min-width: 0; padding: .6rem .7rem; font-family: "DM Mono", monospace; font-size: .78rem; line-height: 1.45; color: var(--fg); }
+  .cell + .cell { border-left: 1px solid var(--rule); }
+  .cell i { display: block; font-style: normal; color: var(--fg-dim); font-size: .7rem; margin-top: .2rem; }
+  .cell i b { color: var(--src); font-weight: 500; }
+  .thead .cell { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-dim); background: var(--paper-2); padding: .4rem .7rem; }
+  .thead .cell.warn { color: var(--warn); }
+  .cell.guess, .cell.guess i { color: var(--warn); }
+  .cell.done { color: var(--src); }
+  .cell.done i { color: var(--fg-mid); }
+
+  .outs { background: color-mix(in srgb, var(--src-wash) 55%, transparent); }
+  .grp { padding: .6rem .8rem .35rem; font-family: "DM Mono", monospace; font-size: .74rem; color: var(--fg-mid); border-bottom: 1px solid var(--rule); }
+  .grp b { color: var(--src); font-weight: 500; }
+  .oline {
+    display: flex; align-items: center; justify-content: space-between; gap: .7rem;
+    padding: .5rem .8rem .5rem 1.15rem; border-bottom: 1px solid var(--rule); position: relative;
+  }
+  .oline::before { content: ""; position: absolute; left: .8rem; top: 1.05rem; width: .22rem; height: 1px; background: var(--rule); }
+  .oline .t { font-family: "DM Mono", monospace; font-size: .76rem; line-height: 1.4; color: var(--fg); }
+  .chip {
+    flex: none; font-family: "DM Mono", monospace; font-size: .66rem; letter-spacing: .04em;
+    text-transform: uppercase; padding: .22rem .5rem; border: 1px solid; white-space: nowrap;
+  }
+  .chip.ok   { color: var(--src); border-color: color-mix(in srgb, var(--src) 45%, transparent); background: var(--src-wash); }
+  .chip.flag { color: var(--dst); border-color: color-mix(in srgb, var(--dst) 45%, transparent); background: var(--dst-wash); }
+  .chip.q    { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: var(--warn-wash); }
+
+  .morebtn {
+    display: flex; align-items: center; gap: .5rem; width: 100%; text-align: left; cursor: pointer;
+    padding: .55rem .8rem; font-family: "DM Mono", monospace; font-size: .72rem; letter-spacing: .05em;
+    color: var(--fg-mid); background: none; border: 0; border-bottom: 1px solid var(--rule);
+  }
+  .morebtn:hover { color: var(--src); }
+  .morebtn:focus-visible { outline: 2px solid var(--src); outline-offset: -2px; }
+  .morebtn .plus { color: var(--src); display: inline-block; transition: transform .2s ease; }
+  .morebtn[aria-expanded="true"] .plus { transform: rotate(45deg); }
+
+  .screen .foot {
+    display: flex; flex-wrap: wrap; gap: .3rem 1rem; padding: .6rem .8rem; border-top: 1px solid var(--rule);
+    background: var(--paper-2); font-family: "DM Mono", monospace; font-size: .66rem;
+    letter-spacing: .05em; text-transform: uppercase; color: var(--fg-dim);
+  }
+  .screen .foot b { color: var(--warn); font-weight: 500; }
+  .screen.after .foot b { color: var(--src); }
+  .scribble { font-family: "Caveat", "Segoe Script", cursive; font-size: 1.4rem; line-height: 1; color: var(--warn); transform: rotate(-3deg); align-self: flex-end; margin-right: 1rem; }
+
+  /* ---------- technical disclosure ---------- */
+  .tech-toggle {
+    font-family: "DM Mono", monospace; font-size: .74rem; letter-spacing: .12em; text-transform: uppercase;
+    background: transparent; color: var(--fg); border: 1px solid var(--rule);
+    padding: .8rem 1.15rem; cursor: pointer; display: inline-flex; align-items: center; gap: .7rem;
+    transition: border-color .18s ease, color .18s ease;
+  }
+  .tech-toggle:hover { border-color: var(--src); color: var(--src); }
+  .tech-toggle:focus-visible { outline: 2px solid var(--src); outline-offset: 3px; }
+  .tech-toggle .plus { display: inline-block; transition: transform .25s ease; }
+  .tech-toggle[aria-expanded="true"] .plus { transform: rotate(45deg); }
+  .tech-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.6rem; margin-top: 2rem; }
+  .tech-body p { color: var(--fg-mid); font-size: .97rem; }
+  .tech-body .k { font-family: "DM Mono", monospace; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--fg); display: block; margin-bottom: .5rem; }
+
+  /* ---------- footer ---------- */
+  footer { padding: clamp(3rem, 7vh, 5rem) clamp(1.15rem, 4vw, 2.4rem); }
+  .sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .9rem 2rem; }
+  .sources div { font-family: "DM Mono", monospace; font-size: .68rem; line-height: 1.6; color: var(--fg-dim); letter-spacing: .02em; }
+  .sources b { color: var(--fg-mid); font-weight: 500; }
+
+  /* ---------- motion ---------- */
+  .reveal { opacity: 0; transform: translateY(16px); }
+  .reveal.in { opacity: 1; transform: none; transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal.in { opacity: 1; transform: none; transition: none; }
+    * { scroll-behavior: auto !important; }
+  }
+  html { scroll-behavior: smooth; }
+
+  @media print {
+    .reveal, .reveal.in { opacity: 1 !important; transform: none !important; }
+    .masthead, .rail { position: static; }
+    section { break-inside: avoid; }
+  }
+</style>
+
+<div class="rail"><i id="progress"></i></div>
+
+<header class="masthead">
+  <div class="mark">
+    <span class="chip" aria-hidden="true"></span>
+    <span class="name">Learning Passport</span>
+  </div>
+  <span class="label">2026</span>
+</header>
+
+<main>
+
+  <!-- 1 · thesis -->
+  <section class="hero">
+    <div class="wrap stack g-m">
+      <span class="label reveal">The problem is not verification. It is meaning.</span>
+      <h1 class="reveal">A qualification says where you studied. Not what you learned.</h1>
+      <p class="sub reveal">So every time a student crosses a border, a human being reads their transcript and guesses. <b>Learning Passport makes the guess unnecessary.</b></p>
+      <div class="mrz reveal" aria-hidden="true">
+        <div data-mrz="P<SRB<MATEMATIKA<PRVI<RAZRED<<<<<<<<<<<<<<<<"></div>
+        <div data-mrz="USA<ALGEBRA1<HSA<REI<C<6<<<<<<<<<<<<<<MATCHED"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · cost of the status quo -->
+  <section>
+    <div class="wrap stack g-l">
+      <div class="stack g-m">
+        <span class="label reveal">01 — What the status quo costs</span>
+        <h2 class="reveal">An administrator in Texas has no way of knowing what <em class="pull">Matematika 1</em> in Serbia covered.</h2>
+        <p class="lede reveal">So the work is done by hand, one student at a time, and paid for twice — in fees, and again in credit that evaporates.</p>
+      </div>
+      <div class="stats reveal">
+        <div class="stat">
+          <span class="n">5–15 <small>days</small></span>
+          <span class="k">To evaluate a single foreign transcript</span>
+          <span class="src">AACRAO</span>
+        </div>
+        <div class="stat">
+          <span class="n">$150–300</span>
+          <span class="k">Per student, per evaluation</span>
+          <span class="src">WES pricing</span>
+        </div>
+        <div class="stat">
+          <span class="n">$13–26k</span>
+          <span class="k">Lost per student in credit not carried over</span>
+          <span class="src">CHEPP</span>
+        </div>
+        <div class="stat">
+          <span class="n">6M</span>
+          <span class="k">Students crossing borders each year, and rising</span>
+          <span class="src">IIE Project Atlas</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · the same desk, before and after -->
+  <section>
+    <div class="wrap stack g-l">
+      <div class="stack g-m">
+        <span class="label reveal">02 — The same desk, before and after</span>
+        <h2 class="reveal">A course title tells an admissions officer nothing. So they estimate.</h2>
+        <p class="lede reveal">Three separate unknowns per subject — what the course actually covered, what the grade means, what it is worth — each one a judgment call by someone who does not read the language. With the curriculum already mapped, none of them is a judgment call.</p>
+      </div>
+
+      <div class="ba reveal">
+        <figure>
+          <figcaption class="now-cap">Today <em>· 12 days, $255, still a guess</em></figcaption>
+          <div class="split">
+            <div class="doc">
+            <p class="hd" lang="sr">РЕПУБЛИКА СРБИЈА<b>СВЕДОЧАНСТВО</b>гимназија · I разред</p>
+            <hr>
+            <div class="bars"><i style="width:88%"></i><i style="width:62%"></i></div>
+            <div class="gr" lang="sr">Математика <span>4</span></div>
+            <div class="gr" lang="sr">Физика <span>5</span></div>
+            <div class="bars"><i style="width:74%"></i><i style="width:45%"></i></div>
+            <div class="end"><span class="sig">Директор</span><span class="stamp">М.П.</span></div>
+          </div>
+            <div class="arrow"><span class="g">→</span><span class="w">read by eye</span></div>
+            <div class="screen now">
+              <div class="bar"><span class="dot"></span><span class="fn">admissions · applicant-4471</span></div>
+              <div class="tbl">
+                <div class="trow thead"><span class="cell">as issued</span><span class="cell warn">us equivalent?</span></div>
+                <div class="trow">
+                  <span class="cell" lang="sr">Математика<i>оцена 4 · 148 ч.</i></span>
+                  <span class="cell guess">Mathematics?<i>grade B? · 1 cr?</i></span>
+                </div>
+                <div class="trow">
+                  <span class="cell" lang="sr">Физика<i>оцена 5 · 74 ч.</i></span>
+                  <span class="cell guess">Physics<i>grade A? · 0.5 cr?</i></span>
+                </div>
+                <div class="trow">
+                  <span class="cell" lang="sr">Информатика<i>оцена 5 · 74 ч.</i></span>
+                  <span class="cell guess">?<i>? · ?</i></span>
+                </div>
+              </div>
+              <div class="foot"><span>to evaluator · day 1</span><span>back · <b>day 12</b></span><span><b>$255</b></span></div>
+            </div>
+          </div>
+          <p class="scribble">same as Algebra 1?</p>
+        </figure>
+
+        <figure>
+          <figcaption class="after-cap">With Learning Passport <em>· same document, no evaluator</em></figcaption>
+          <div class="split">
+            <div class="doc">
+            <p class="hd" lang="sr">РЕПУБЛИКА СРБИЈА<b>СВЕДОЧАНСТВО</b>гимназија · I разред</p>
+            <hr>
+            <div class="bars"><i style="width:88%"></i><i style="width:62%"></i></div>
+            <div class="gr" lang="sr">Математика <span>4</span></div>
+            <div class="gr" lang="sr">Физика <span>5</span></div>
+            <div class="bars"><i style="width:74%"></i><i style="width:45%"></i></div>
+            <div class="end"><span class="sig">Директор</span><span class="stamp">М.П.</span></div>
+          </div>
+            <div class="arrow"><span class="g">→</span><span class="w">curriculum mapped</span></div>
+            <div class="screen after">
+              <div class="bar"><span class="dot"></span><span class="fn">admissions · applicant-4471</span></div>
+              <div class="tbl">
+                <div class="trow thead"><span class="cell">as issued</span><span class="cell">us equivalent</span></div>
+                <div class="trow">
+                  <span class="cell" lang="sr">Математика<i>оцена 4 · 148 ч.</i></span>
+                  <span class="cell done">Algebra 1<i><b>87% overlap</b></i><i>B · 148 h.</i></span>
+                </div>
+              </div>
+              <div class="outs">
+                <div class="grp"><b>12 outcomes</b> in this course</div>
+                <div class="oline"><span class="t" lang="sr">решити систем две линеарне једначине</span><span class="chip ok">HSA-REI.C.6</span></div>
+                <div class="oline"><span class="t" lang="sr">решити линеарне неједначине</span><span class="chip ok">HSA-REI.B.3</span></div>
+                <div class="oline"><span class="t" lang="sr">користити логичке операције</span><span class="chip flag">no match</span></div>
+                <button class="morebtn" id="moreBtn" type="button" aria-expanded="false" aria-controls="moreBody">
+                  <span class="plus" aria-hidden="true">+</span> 9 more · Физика, Информатика
+                </button>
+                <div id="moreBody" hidden>
+                  <div class="oline"><span class="t" lang="sr">Физика · 6 outcomes</span><span class="chip ok">NGSS · 4 matched</span></div>
+                  <div class="oline"><span class="t" lang="sr">Информатика · 3 outcomes</span><span class="chip ok">CSTA · 3 matched</span></div>
+                </div>
+              </div>
+              <div class="foot"><span>verified · <b>instant</b></span><span>no evaluator</span><span>traceable to source</span></div>
+            </div>
+          </div>
+        </figure>
+      </div>
+
+      <p class="fine reveal" style="max-width:74ch">Nothing about the student's paperwork changes. What changes is that the curriculum behind it has been read once — so the course opens into what it actually taught, the overlap with the receiving system is a measurement rather than an opinion, and where there is genuinely no equivalent the record says so instead of guessing.</p>
+    </div>
+  </section>
+
+  <!-- 3 · what it is : the matched pair -->
+  <section>
+    <div class="wrap stack g-l">
+      <div class="stack g-m">
+        <span class="label reveal">03 — What sits underneath</span>
+        <h2 class="reveal">Underneath is one claim, made once per curriculum.</h2>
+        <p class="lede reveal">That 87% is not a similarity score on two course titles. It is the outcomes of both curricula, read in their own languages and matched one by one — like this pair, which two education systems wrote a decade and a continent apart.</p>
+      </div>
+
+      <div class="match reveal">
+        <div class="card a">
+          <span class="flag">Serbia · Gimnazija, year 1</span>
+          <p class="out" lang="sr">решити систем две линеарне једначине са две непознате</p>
+          <p class="meta">
+            operation <span>решити</span><br>
+            concept <span lang="sr">систем две линеарне једначине</span><br>
+            scope <span>две непознате</span><br>
+            source <span>Просветни гласник 4/2020, pp. 89–94</span>
+          </p>
+        </div>
+        <div class="seam" aria-hidden="true">
+          <span class="bar"></span>
+          <span class="eq">same outcome</span>
+          <span class="bar"></span>
+        </div>
+        <div class="card b">
+          <span class="flag">United States · Algebra 1</span>
+          <p class="out">solve systems of linear equations in two variables</p>
+          <p class="meta">
+            operation <span>solve</span><br>
+            concept <span>system of linear equations</span><br>
+            scope <span>two variables</span><br>
+            source <span>Common Core HSA-REI.C.6</span>
+          </p>
+        </div>
+      </div>
+
+      <p class="fine reveal" style="max-width:70ch">Two education systems that share no common language, no common notation and no common document format — and the machine can say, with the source line attached, that they are teaching the same thing. A school issues the passport. A university on the other side of the world reads it directly, with nothing to interpret and no one to pay for interpreting it.</p>
+    </div>
+  </section>
+
+  <!-- 4 · proof -->
+  <section>
+    <div class="wrap stack g-l">
+      <div class="stack g-m">
+        <span class="label reveal">04 — Where it stands today</span>
+        <h2 class="reveal">This is not a slide deck.</h2>
+        <p class="lede reveal">The engine has been run end to end on a real national curriculum — Serbian first-year secondary mathematics, in Cyrillic, taken straight from the government gazette — and matched against the US Algebra 1 curriculum.</p>
+      </div>
+      <div class="stats reveal">
+        <div class="stat">
+          <span class="n">2</span>
+          <span class="k">Curricula, two scripts, two document formats</span>
+        </div>
+        <div class="stat">
+          <span class="n">~400</span>
+          <span class="k">Structured learning outcomes extracted</span>
+        </div>
+        <div class="stat">
+          <span class="n">100<small>%</small></span>
+          <span class="k">Traceable to the source line they came from</span>
+        </div>
+        <div class="stat">
+          <span class="n">Scored</span>
+          <span class="k">Against a hand-built answer key, not eyeballed</span>
+        </div>
+      </div>
+      <div class="note reveal">
+        <span class="h">Stated plainly</span>
+        <p>One subject. Two countries. What stands between that and a usable standard is no longer invention — it is scale, and scale is what costs money.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · the raise -->
+  <section>
+    <div class="wrap stack g-l">
+      <div class="stack g-m">
+        <span class="label reveal">05 — Why this needs capital</span>
+        <h2 class="reveal">Nobody pays to cross a bridge that reaches halfway.</h2>
+        <p class="lede reveal">A passport readable against three curricula is a curiosity. Against fifty it is infrastructure. The map has to exist before it is worth anything to anyone — which is exactly the part that cannot be sold in instalments.</p>
+      </div>
+      <div class="ledger reveal">
+        <div class="row"><span class="t">Engine</span><span class="d">Engineers to harden extraction and matching to production reliability</span></div>
+        <div class="row"><span class="t">Curricula</span><span class="d">Acquisition and mapping of the first national curricula — <b>US, IB, EU, UK</b></span></div>
+        <div class="row"><span class="t">Pilots</span><span class="d">A small team to put it in front of the first schools and admissions offices</span></div>
+        <div class="row"><span class="t">Infrastructure</span><span class="d">Issuance, verification and the security an academic record demands</span></div>
+        <div class="row"><span class="t">Runway</span><span class="d"><b>A year to eighteen months</b> before meaningful revenue</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · economics -->
+  <section>
+    <div class="wrap stack g-l">
+      <div class="stack g-m">
+        <span class="label reveal">06 — Why the economics work</span>
+        <h2 class="reveal">They pay a human per student. We pay once per curriculum.</h2>
+      </div>
+      <div class="cols reveal">
+        <div class="col">
+          <span class="who">The incumbents</span>
+          <p class="claim">$150–300 per student — and an evaluator for every single one.</p>
+          <p>That is the shape of the entire credential-evaluation industry. Revenue per student is decent, but so is cost per student, and growth means hiring.</p>
+        </div>
+        <div class="col ours">
+          <span class="who">Learning Passport</span>
+          <p class="claim">Map a curriculum once. Every student who studied it is covered.</p>
+          <p>Serbian secondary mathematics is read, structured and matched a single time. After that, each student who carries it costs a lookup.</p>
+        </div>
+      </div>
+      <p class="lede reveal" style="max-width:44ch; font-family:Fraunces, Georgia, serif; font-size:clamp(1.3rem,2.6vw,2rem); line-height:1.2; color:var(--fg); letter-spacing:-.015em">Revenue scales with students. Cost scales with curricula. There are only so many curricula in the world.</p>
+    </div>
+  </section>
+
+  <!-- 7 · moat + market + close -->
+  <section class="close">
+    <div class="wrap stack g-l">
+      <div class="stack g-m">
+        <span class="label reveal">07 — Why it compounds</span>
+        <h2 class="reveal">Anyone can issue a certificate. The map underneath is the asset.</h2>
+        <p class="kicker lede reveal">Every curriculum added makes the next comparison sharper. Every school that joins makes the next school's decision easier. The market is already consolidating around ownership of academic records.</p>
+      </div>
+      <div class="market reveal">
+        <div>
+          <span class="m-n">$4.2B</span>
+          <span class="m-k">Credential evaluation market by 2035</span>
+        </div>
+        <div>
+          <span class="m-n">$835M</span>
+          <span class="m-k">Paid by Instructure for Parchment — a company that moves academic documents without understanding what is inside them</span>
+        </div>
+      </div>
+      <h2 class="reveal" style="max-width:20ch">We aren't selling software into a standard. We're building the standard.</h2>
+    </div>
+  </section>
+
+  <!-- 8 · technical, on demand -->
+  <section>
+    <div class="wrap stack g-m">
+      <span class="label reveal">08 — For the technically minded</span>
+      <button class="tech-toggle reveal" id="techToggle" aria-expanded="false" aria-controls="techBody">
+        <span class="plus" aria-hidden="true">+</span> How the system actually works
+      </button>
+      <div class="tech-body" id="techBody" hidden>
+        <p>
+          <span class="k">Curriculum as source code</span>
+          A curriculum document is parsed into its real structure, then reduced to the smallest independently teachable claims it makes — each one an action applied to an object under stated conditions.
+        </p>
+        <p>
+          <span class="k">Original language throughout</span>
+          Nothing is translated during extraction. Translating at that stage silently destroys the distinctions we exist to measure; cross-language meaning is carried as auditable metadata alongside the original, never in place of it.
+        </p>
+        <p>
+          <span class="k">Auditable by construction</span>
+          Every stage is isolated and every output stays traceable to the line it came from, so a wrong answer can be located rather than argued about — and any stage that can be deterministic code rather than a model call is code. That is what makes the output stable enough to score against a fixed answer key at all.
+        </p>
+        <p>
+          <span class="k">Matching</span>
+          Comparison across systems runs over those structured units in a shared semantic space rather than over course titles or free text, with genuinely ambiguous cases surfaced for expert review instead of being quietly resolved by a model.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap stack g-m">
+    <span class="label">Sources</span>
+    <div class="sources">
+      <div><b>AACRAO</b> — International evaluation standards, on time to evaluate a foreign transcript</div>
+      <div><b>World Education Services</b> — Published course-by-course evaluation pricing</div>
+      <div><b>CHEPP (2024)</b> — The costs of today's college credit transfer system for learners</div>
+      <div><b>IIE Project Atlas</b> — Internationally mobile student counts</div>
+      <div><b>WiseGuy Reports</b> — Credential evaluation services market outlook to 2035</div>
+      <div><b>Instructure (2023)</b> — Agreement to acquire Parchment</div>
+    </div>
+    <div class="mrz" aria-hidden="true" style="margin-top:1.5rem">
+      <div data-mrz="LP<<ONE<CURRICULUM<MAPPED<<EVERY<STUDENT<FREE"></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // scroll progress
+  var bar = document.getElementById('progress');
+  function onScroll() {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  // reveal on enter
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var items = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  if (reduced || !('IntersectionObserver' in window)) {
+    items.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          var sibs = Array.prototype.slice.call(e.target.parentNode.querySelectorAll('.reveal'));
+          var i = Math.max(0, sibs.indexOf(e.target));
+          e.target.style.transitionDelay = Math.min(i * 70, 280) + 'ms';
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: .1 });
+    items.forEach(function (el) { io.observe(el); });
+  }
+
+  // the "+ 9 more" cell
+  var mb = document.getElementById('moreBtn');
+  var mbody = document.getElementById('moreBody');
+  if (mb) {
+    mb.addEventListener('click', function () {
+      var open = mb.getAttribute('aria-expanded') === 'true';
+      mb.setAttribute('aria-expanded', String(!open));
+      mbody.hidden = open;
+    });
+  }
+
+  // technical disclosure
+  var t = document.getElementById('techToggle');
+  var b = document.getElementById('techBody');
+  t.addEventListener('click', function () {
+    var open = t.getAttribute('aria-expanded') === 'true';
+    t.setAttribute('aria-expanded', String(!open));
+    b.hidden = open;
+    if (!open) {
+      Array.prototype.slice.call(b.querySelectorAll('p')).forEach(function (el) { el.classList.add('in'); });
+    }
+  });
+
+  // arrow-key navigation between sections
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section'));
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || e.metaKey || e.ctrlKey || e.altKey) return;
+    var y = window.scrollY + 8;
+    var idx = 0;
+    sections.forEach(function (s, i) { if (s.offsetTop <= y) idx = i; });
+    var next = e.key === 'ArrowDown' ? idx + 1 : idx - 1;
+    if (next < 0 || next >= sections.length) return;
+    e.preventDefault();
+    sections[next].scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  });
+</script>
